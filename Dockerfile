@@ -1,27 +1,23 @@
-FROM python:3.9
+FROM node:18
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
-    software-properties-common \
     python3-pip \
-    nodejs \
-    npm
+    python3 \
+    software-properties-common
 
-# Install Solidity compiler
-RUN curl -fsSL https://bootstrap.pypa.io/get-pip.py | python3
-RUN pip3 install --user solc-select
-RUN pip3 install solidity-utils
-RUN solc-select install 0.8.0
-RUN solc-select use 0.8.0
-
-# Install Slither
+# Install Solidity compiler and Slither
 RUN pip3 install slither-analyzer
 
-# Your app setup
+# Create app directory
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+
+# Install app dependencies
+COPY package*.json ./
+RUN npm install
+
+# Bundle app source
 COPY . .
 
-# Command to run app
-CMD ["python", "app.py"]
+# Start command
+CMD ["node", "backend.mjs"]
